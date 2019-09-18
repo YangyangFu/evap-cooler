@@ -1,7 +1,13 @@
-within ;
-model DEC_neumerical_test3
+within EvaporativeCooler.Examples;
+model DirectEvaporativeCooler
+  extends Modelica.Icons.Example;
   replaceable package Medium1 = Buildings.Media.Water;
   replaceable package Medium2 = Buildings.Media.Air;
+
+  parameter Modelica.SIunits.MassFlowRate m1_flow_nominal=0.32
+    "Nominal mass flow rate";
+  parameter Modelica.SIunits.MassFlowRate m2_flow_nominal=3.2
+    "Nominal mass flow rate";
 
   Buildings.Fluid.Sources.Boundary_pT bou_air_indoor(
     redeclare package Medium = Medium2,
@@ -14,38 +20,34 @@ model DEC_neumerical_test3
     annotation (Placement(transformation(extent={{-142,42},{-122,62}})));
   Buildings.Fluid.Movers.FlowControlled_m_flow Pump(
     redeclare package Medium = Medium1,
-    m_flow_nominal=0.32,
     addPowerToMedium=false,
     nominalValuesDefineDefaultPressureCurve=true,
     dp_nominal=11652.14,
-    m_flow_start=0.32)
+    m_flow_start=0.32,
+    m_flow_nominal=m1_flow_nominal)
     annotation (Placement(transformation(extent={{-54,12},{-34,32}})));
   Buildings.Fluid.Sources.Boundary_ph Bou_water1(redeclare package Medium =
         Medium1, nPorts=1)
     annotation (Placement(transformation(extent={{80,12},{60,32}})));
-  Modelica.Blocks.Sources.RealExpression mflow(y=0.151)
+  Modelica.Blocks.Sources.RealExpression mflow(y=10*m2_flow_nominal)
     annotation (Placement(transformation(extent={{174,6},{154,-14}})));
   Modelica.Blocks.Sources.RealExpression Air_composition(y=41.2 + 273.15)
     annotation (Placement(transformation(extent={{174,-14},{154,-34}})));
   Buildings.Fluid.Sensors.TemperatureWetBulbTwoPort senWetBul(
-    redeclare package Medium = Medium2,
-    m_flow_nominal=2.593,
-    tau=0) annotation (Placement(transformation(extent={{-66,-24},{-56,-14}})));
+    redeclare package Medium = Medium2, m_flow_nominal=m2_flow_nominal)
+           annotation (Placement(transformation(extent={{-66,-24},{-56,-14}})));
   Buildings.Fluid.Sensors.MassFlowRate senMasFlo(redeclare package Medium =
         Medium2)
     annotation (Placement(transformation(extent={{-42,-24},{-32,-14}})));
   Buildings.Fluid.Sensors.TemperatureTwoPort senTem1(
-    redeclare package Medium = Medium2,
-    m_flow_nominal=2.593,
-    tau=0) annotation (Placement(transformation(extent={{26,-48},{36,-36}})));
+    redeclare package Medium = Medium2, m_flow_nominal=m2_flow_nominal)
+           annotation (Placement(transformation(extent={{26,-48},{36,-36}})));
   Buildings.Fluid.Sensors.TemperatureWetBulbTwoPort senWetBul1(
-    redeclare package Medium = Medium2,
-    m_flow_nominal=0.5,
-    tau=0) annotation (Placement(transformation(extent={{42,-48},{54,-36}})));
+    redeclare package Medium = Medium2, m_flow_nominal=m2_flow_nominal)
+           annotation (Placement(transformation(extent={{42,-48},{54,-36}})));
   Buildings.Fluid.Sensors.RelativeHumidityTwoPort senRelHum(
-    redeclare package Medium = Medium2,
-    m_flow_nominal=2.593,
-    tau=0) annotation (Placement(transformation(extent={{-24,-24},{-14,-14}})));
+    redeclare package Medium = Medium2, m_flow_nominal=m2_flow_nominal)
+           annotation (Placement(transformation(extent={{-24,-24},{-14,-14}})));
   Modelica.Blocks.Sources.Ramp ramp1(
     height=2.54,
     duration=10000,
@@ -53,9 +55,8 @@ model DEC_neumerical_test3
     startTime=100)
     annotation (Placement(transformation(extent={{140,56},{120,76}})));
   Buildings.Fluid.Sensors.TemperatureTwoPort senTem2(
-    redeclare package Medium = Medium2,
-    m_flow_nominal=2.47,
-    tau=0) annotation (Placement(transformation(extent={{-80,-24},{-70,-12}})));
+    redeclare package Medium = Medium2, m_flow_nominal=m2_flow_nominal)
+           annotation (Placement(transformation(extent={{-80,-24},{-70,-12}})));
   Buildings.Fluid.Sources.Boundary_pT bou_air_outdoor(
     redeclare package Medium = Medium2,
     use_Xi_in=true,
@@ -67,14 +68,11 @@ model DEC_neumerical_test3
     use_T_in=true,
     nPorts=1)
     annotation (Placement(transformation(extent={{-104,12},{-84,32}})));
-  EvaporativeCooler.DEC_Neumerical_Method2_test2
-    dEC_Neumerical_Method2_test2_1(
+  EvaporativeCooler.DirectEvaporativeCooler evaCoo(
     redeclare package Medium1 = Medium1,
     redeclare package Medium2 = Medium2,
     allowFlowReversal1=true,
     allowFlowReversal2=true,
-    m1_flow_nominal=0.32,
-    m2_flow_nominal=3.2,
     dp1_nominal=11652.14,
     dp2_nominal=50,
     Thickness=0.1,
@@ -82,7 +80,10 @@ model DEC_neumerical_test3
     Height=0.50,
     K_value=0.04,
     Contact_surface_area=275,
-    Rcon=10) annotation (Placement(transformation(extent={{2,6},{22,26}})));
+    Rcon=10,
+    m1_flow_nominal=m1_flow_nominal,
+    m2_flow_nominal=m2_flow_nominal)
+    annotation (Placement(transformation(extent={{2,6},{22,26}})));
   Modelica.Blocks.Tables.CombiTable1D combiTable1D1(table=[0,0.0286; 100,0.0227;
         200,0.0175; 300,0.0129; 400,0.00882; 500,0.00519; 600,0.00193; 700,
         0.0405; 800,0.0329; 900,0.0262; 1000,0.0203; 1100,0.0151; 1200,0.0106;
@@ -102,7 +103,6 @@ model DEC_neumerical_test3
   Buildings.Fluid.Movers.FlowControlled_m_flow Fan(
     redeclare package Medium = Medium2,
     y_start=1,
-    m_flow_nominal=2.5,
     per(
       pressure(V_flow={1.63,1.67,1.71,1.74,1.78,1.83,1.90,1.95,2.003,2.04,2.09,
             2.14,2.18,2.23}, dp={145.9,136.04,124.4,120,110.1,99.0,85.4,75.55,
@@ -112,10 +112,11 @@ model DEC_neumerical_test3
       motorCooledByFluid=true,
       speed_rpm_nominal=420),
     inputType=Buildings.Fluid.Types.InputType.Continuous,
-    addPowerToMedium=true,
-    nominalValuesDefineDefaultPressureCurve=false,
-    m_flow_start=0.201)
+    m_flow_start=0.201,
+    m_flow_nominal=m2_flow_nominal,
+    addPowerToMedium=false)
     annotation (Placement(transformation(extent={{88,-52},{68,-32}})));
+
 equation
   connect(senWetBul.port_b,senMasFlo. port_a)
     annotation (Line(points={{-56,-19},{-42,-19}}, color={0,127,255}));
@@ -129,18 +130,18 @@ equation
           {-86,-18},{-86,-26},{-96,-26}},          color={0,127,255}));
   connect(Temperature.y, Bou_water2.T_in) annotation (Line(points={{-121,28},{
           -114,28},{-114,26},{-106,26}}, color={0,0,127}));
-  connect(dEC_Neumerical_Method2_test2_1.port_b1, Bou_water1.ports[1])
+  connect(evaCoo.port_b1, Bou_water1.ports[1])
     annotation (Line(points={{22,22},{60,22}}, color={0,127,255}));
-  connect(dEC_Neumerical_Method2_test2_1.port_a2, senTem1.port_a) annotation (
-      Line(points={{22,10},{24,10},{24,-42},{26,-42}}, color={0,127,255}));
+  connect(evaCoo.port_a2, senTem1.port_a) annotation (Line(points={{22,10},{24,10},
+          {24,-42},{26,-42}}, color={0,127,255}));
   connect(Bou_water2.ports[1], Pump.port_a)
     annotation (Line(points={{-84,22},{-54,22}}, color={0,127,255}));
-  connect(Pump.port_b, dEC_Neumerical_Method2_test2_1.port_a1) annotation (Line(
-        points={{-34,22},{-16,22},{-16,22},{2,22}}, color={0,127,255}));
+  connect(Pump.port_b, evaCoo.port_a1) annotation (Line(points={{-34,22},{-16,22},
+          {-16,22},{2,22}}, color={0,127,255}));
   connect(watePumpHead.y, Pump.m_flow_in) annotation (Line(points={{-121,52},{
           -88,52},{-88,54},{-44,54},{-44,34}}, color={0,0,127}));
-  connect(senRelHum.port_b, dEC_Neumerical_Method2_test2_1.port_b2) annotation (
-     Line(points={{-14,-19},{-6,-19},{-6,10},{2,10}}, color={0,127,255}));
+  connect(senRelHum.port_b, evaCoo.port_b2) annotation (Line(points={{-14,-19},{
+          -6,-19},{-6,10},{2,10}}, color={0,127,255}));
   connect(clock.y, combiTable1D1.u[1]) annotation (Line(points={{207,-8},{198,
           -8},{198,-92},{206,-92}}, color={0,0,127}));
   connect(Air_composition.y, bou_air_outdoor.T_in)
@@ -153,11 +154,6 @@ equation
           -42},{100,-42},{100,-50},{112,-50}}, color={0,127,255}));
   connect(mflow.y, Fan.m_flow_in)
     annotation (Line(points={{153,-4},{78,-4},{78,-30}}, color={0,0,127}));
-  annotation (uses(
-      EnergyPlus_DEC_Blocks(version="1"),
-      Buildings(version="6.0.0"),
-      Modelica(version="3.2.2"),
-      EvaporativeCooler(version="1")),
-    Diagram(coordinateSystem(extent={{-160,-100},{240,100}})),
-    Icon(coordinateSystem(extent={{-160,-100},{240,100}})));
-end DEC_neumerical_test3;
+  annotation (
+    Diagram(coordinateSystem(extent={{-160,-100},{240,100}})));
+end DirectEvaporativeCooler;
